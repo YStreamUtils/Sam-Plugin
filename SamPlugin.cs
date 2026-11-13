@@ -5,7 +5,7 @@ using YStreamUtils.SDK.Plugin;
 
 [assembly: PluginManifest(
     "Sam-Plugin", 
-    "v1.0.0", 
+    "v1.0.1", 
     "SAM Integration, because it's funny",
     "YStreamUtils",
     "SAM-Plugin",
