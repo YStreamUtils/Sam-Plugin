@@ -11,6 +11,9 @@ on:
         required: true
         type: string
 
+env:
+  PLUGIN_NAME: Sam-Plugin
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -41,18 +44,18 @@ jobs:
 
       - name: Dotnet Publish Project
         run: |
-          dotnet publish OBSPlugin.csproj -c Release -o ./publish
+          dotnet publish ${{ env.PLUGIN_NAME }}.csproj -c Release -o ./publish
 
       - name: Zip Published Artifacts
         run: |
           cd ./publish
-          zip -r ../OBSPlugin.zip .
+          zip -r ../${{ env.PLUGIN_NAME }}.zip .
           cd ..
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ env.TAG_NAME }} OBSPlugin.zip \
+          gh release create ${{ env.TAG_NAME }} ${{ env.PLUGIN_NAME }}.zip \
             --title "Release ${{ env.TAG_NAME }}" \
             --notes "Automated release via ${{ github.event_name }} (Commit: ${{ github.sha }})"
