@@ -17,7 +17,7 @@ env:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
 
@@ -44,18 +44,23 @@ jobs:
 
       - name: Dotnet Publish Project
         run: |
-          dotnet publish ${{ env.PLUGIN_NAME }}.csproj -c Release -o ./publish
+          CSPROJ=$(find . -name "${{ env.PLUGIN_NAME }}.csproj" -print -quit)
+          dotnet publish "$CSPROJ" -c Release -o ./publish
 
       - name: Zip Published Artifacts
         run: |
           cd ./publish
-          zip -r ../${{ env.PLUGIN_NAME }}.zip .
+          zip -r "../${{ env.PLUGIN_NAME }}.zip" .
           cd ..
 
-      - name: Create GitHub Release
+      - name: Create or Update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ env.TAG_NAME }} ${{ env.PLUGIN_NAME }}.zip \
-            --title "Release ${{ env.TAG_NAME }}" \
-            --notes "Automated release via ${{ github.event_name }} (Commit: ${{ github.sha }})"
+          if gh release view "${{ env.TAG_NAME }}" >/dev/null 2>&1; then
+            gh release upload "${{ env.TAG_NAME }}" "${{ env.PLUGIN_NAME }}.zip" --clobber
+          else
+            gh release create "${{ env.TAG_NAME }}" "${{ env.PLUGIN_NAME }}.zip" \
+              --title "Release ${{ env.TAG_NAME }}" \
+              --notes "Automated release via ${{ github.event_name }} (Commit: ${{ github.sha }})"
+          fi
